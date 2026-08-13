@@ -25,18 +25,44 @@ Deliberately *not* adopted: `@mozilla/readability`, `turndown`, `undici`, `unpdf
 Requires Node.js ≥ 20 (uses global `fetch`).
 
 ```sh
-node server.js
+git clone https://github.com/withlovehub/dsh-webfetch.git
+cd dsh-webfetch
+
+# Optional but convenient: puts the `dsh-webfetch` command on your PATH
+npm link          # or: npm install -g .
+
+node test.js      # 32 in-process test cases — all green means your Node is ready
 ```
 
-The server speaks newline-delimited JSON-RPC 2.0 on stdio. Test it:
+The server speaks newline-delimited JSON-RPC 2.0 on stdio. Once published to npm, the one-liner is `npx -y dsh-webfetch`.
+
+Smoke-test the server by hand (expect an `initialize` response and a `tools/list` response on stdout):
 
 ```sh
-node test.js   # 32 in-process test cases (protocol, cleaning, robots, CF retry, SSRF, chunking)
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"probe","version":"0"}}}' \
+  '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
+  | node server.js
 ```
 
-## DeepSeek Harness integration
+PowerShell equivalent:
 
-Add an entry to your home-level patch `~/.dsh/cordis.patch.yml`:
+```powershell
+'{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"probe","version":"0"}}}' | node server.js
+```
+
+## Client setup
+
+The server is a plain stdio MCP server — any MCP client works. Pick your client below; every example uses `node` + the path to `server.js`. Two shortcuts make life easier:
+
+- **Path style**: use forward slashes even on Windows (`C:/dev/dsh-webfetch/server.js`) — Node accepts them and you avoid JSON backslash escaping.
+- **After `npm link`**: set `command` to `dsh-webfetch` and drop `args` entirely.
+
+Most clients require an absolute path; `${workspaceFolder}`-style variables only work where documented (VS Code).
+
+### DeepSeek Harness
+
+File: `~/.dsh/cordis.patch.yml`
 
 ```yaml
 - insert:
@@ -52,20 +78,97 @@ Add an entry to your home-level patch `~/.dsh/cordis.patch.yml`:
 
 Restart `dsh web`; the model gains the **`mcp__web__fetch`** tool.
 
-## Generic MCP client integration
+### Claude Desktop
 
-Any MCP client with stdio servers (Claude Code, etc.):
+File: `claude_desktop_config.json` (Windows: `%APPDATA%\Claude\`, macOS: `~/Library/Application Support/Claude/`). Restart Claude afterwards.
 
 ```json
 {
   "mcpServers": {
     "webfetch": {
       "command": "node",
+      "args": ["C:/path/to/dsh-webfetch/server.js"]
+    }
+  }
+}
+```
+
+### Claude Code
+
+File: `.mcp.json` in your project root (or `claude mcp add` to write it for you).
+
+```json
+{
+  "mcpServers": {
+    "webfetch": {
+      "type": "stdio",
+      "command": "node",
       "args": ["/path/to/dsh-webfetch/server.js"]
     }
   }
 }
 ```
+
+Verify with `claude mcp list`.
+
+### Cursor
+
+File: `.cursor/mcp.json` in your project (or Cursor Settings → MCP → Add new MCP server).
+
+```json
+{
+  "mcpServers": {
+    "webfetch": {
+      "command": "node",
+      "args": ["C:/path/to/dsh-webfetch/server.js"]
+    }
+  }
+}
+```
+
+Verify in Cursor Settings → MCP (green status dot).
+
+### VS Code Copilot
+
+File: `.vscode/mcp.json` — supports the `${workspaceFolder}` variable, so a cloned repo can self-configure:
+
+```json
+{
+  "servers": {
+    "webfetch": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/server.js"]
+    }
+  }
+}
+```
+
+Verify: Command Palette → **MCP: List Servers**.
+
+### OpenCode
+
+File: `opencode.json` (project) or global config.
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "webfetch": {
+        "type": "local",
+        "command": ["node", "/path/to/dsh-webfetch/server.js"]
+      }
+    }
+  }
+}
+```
+
+Verify with `opencode2 mcp list` (v1: `opencode mcp list`).
+
+### Anything else
+
+Any MCP client that speaks stdio works with the same `command` + `args` shape — the protocol is universal.
 
 ## Tool parameters
 

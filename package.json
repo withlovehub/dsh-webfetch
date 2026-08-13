@@ -3,6 +3,15 @@
   "version": "1.1.0",
   "description": "Zero-dependency webfetch MCP server: fetch any http(s) URL as clean text / simplified markdown / raw HTML / formatted JSON, with robots.txt compliance, chunked reading and SSRF protection. Designed for DeepSeek Harness, works with any MCP client.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/withlovehub/dsh-webfetch.git"
+  },
+  "homepage": "https://github.com/withlovehub/dsh-webfetch#readme",
+  "bugs": {
+    "url": "https://github.com/withlovehub/dsh-webfetch/issues"
+  },
+  "author": "withlovehub",
   "main": "server.js",
   "bin": {
     "dsh-webfetch": "server.js"
