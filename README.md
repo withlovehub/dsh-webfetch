@@ -48,7 +48,10 @@ printf '%s\n' \
 PowerShell equivalent:
 
 ```powershell
-'{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"probe","version":"0"}}}' | node server.js
+@(
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"probe","version":"0"}}}',
+  '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+) | node server.js
 ```
 
 ## Client setup
@@ -80,7 +83,7 @@ Restart `dsh web`; the model gains the **`mcp__web__fetch`** tool.
 
 ### Claude Desktop
 
-File: `claude_desktop_config.json` (Windows: `%APPDATA%\Claude\`, macOS: `~/Library/Application Support/Claude/`). Restart Claude afterwards.
+File: `claude_desktop_config.json` (Windows: `%APPDATA%\Claude\`, macOS: `~/Library/Application Support/Claude/`, Linux: `~/.config/Claude/`). Restart Claude afterwards.
 
 ```json
 {
@@ -95,7 +98,11 @@ File: `claude_desktop_config.json` (Windows: `%APPDATA%\Claude\`, macOS: `~/Libr
 
 ### Claude Code
 
-File: `.mcp.json` in your project root (or `claude mcp add` to write it for you).
+File: `.mcp.json` in your project root, or add it from the CLI:
+
+```sh
+claude mcp add webfetch -- node /path/to/dsh-webfetch/server.js
+```
 
 ```json
 {
