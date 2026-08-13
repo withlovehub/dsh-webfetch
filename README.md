@@ -1,5 +1,7 @@
 # dsh-webfetch
 
+[![test](https://github.com/withlovehub/dsh-webfetch/actions/workflows/test.yml/badge.svg)](https://github.com/withlovehub/dsh-webfetch/actions/workflows/test.yml)
+
 A zero-dependency **webfetch MCP server**: fetches any `http(s)` URL and returns clean content — text, simplified Markdown, raw HTML, or formatted JSON. Built for [DeepSeek Harness](https://github.com/deepseek-ai) (`dsh`), works with any MCP client that supports stdio servers.
 
 - **Zero dependencies**: single `server.js`, hand-rolled stdio JSON-RPC 2.0 — no `npm install`, no SDK version conflicts.
